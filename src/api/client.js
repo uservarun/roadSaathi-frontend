@@ -19,6 +19,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      localStorage.removeItem("roadsaathi_user");
+      localStorage.removeItem("roadsaathi_token");
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login?expired=true";
+        return new Promise(() => {}); // Halt the promise chain to prevent local component state errors
+      }
+    }
     const message =
       err.response?.data?.error ||
       err.message ||

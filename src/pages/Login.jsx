@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isExpired = location.search.includes("expired=true");
+
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,6 +32,12 @@ export default function Login() {
         <span className="eyebrow">RoadSaathi</span>
         <h1 style={{ marginBottom: 6, fontSize: 24 }}>Welcome back</h1>
         <p style={{ marginBottom: 24 }}>Log in to plan routes and report road hazards.</p>
+
+        {isExpired && (
+          <div className="info-banner" style={{ background: "rgba(242, 169, 59, 0.1)", color: "var(--amber)", border: "1px solid var(--amber)", padding: "10px 12px", borderRadius: "6px", fontSize: "13px", marginBottom: "16px" }}>
+            Your session has expired. Please log in again.
+          </div>
+        )}
 
         {error && <div className="error-banner">{error}</div>}
 
