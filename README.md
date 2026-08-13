@@ -19,7 +19,7 @@ Create a `.env` file in the root of the frontend folder:
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 ```
-*(If your backend is hosted on Render, change the URL to your Render deployment URL, e.g. `https://roadsathi-backend.onrender.com`)*
+*(If your backend is hosted on Render, change the URL to your Render deployment URL, e.g. `https://your-backend-api.onrender.com`)*
 
 ### 2. Run in Development Mode
 Run the following commands in your terminal:
