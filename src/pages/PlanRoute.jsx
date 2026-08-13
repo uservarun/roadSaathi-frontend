@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import L from "leaflet";
 import { calculateSafeRoute } from "../api/routing";
-import { saveCommute } from "../api/commutes";
+import { saveCommute, getUserCommutes } from "../api/commutes";
 import { wktLineStringToLatLng } from "../utils/wkt";
 import { useAuth } from "../context/AuthContext";
 import RouteResultCard from "../components/RouteResultCard";
@@ -34,6 +34,7 @@ export default function PlanRoute() {
 
   const [commuteName, setCommuteName] = useState("");
   const [saveStatus, setSaveStatus] = useState({ loading: false, error: "", success: "" });
+  const [savedCommutes, setSavedCommutes] = useState([]);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -71,10 +72,21 @@ export default function PlanRoute() {
     }
   };
 
-  // Auto-ask geolocation on mount
+  // Auto-ask geolocation & load saved commutes on mount
   useEffect(() => {
     handleUseMyLocation();
-  }, []);
+    const fetchCommutes = async () => {
+      if (user?.id) {
+        try {
+          const data = await getUserCommutes(user.id);
+          setSavedCommutes(data);
+        } catch (e) {
+          console.error("Failed to load saved commutes for dropdown", e);
+        }
+      }
+    };
+    fetchCommutes();
+  }, [user?.id]);
 
   // Geocoding Search
   const handleSearch = async (query, type) => {
@@ -338,6 +350,38 @@ export default function PlanRoute() {
       </div>
 
       <div className="card card-tight" style={{ marginBottom: 20, display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
+        {savedCommutes.length > 0 && (
+          <div className="field" style={{ marginBottom: 0, minWidth: 200 }}>
+            <label htmlFor="loadCommute">Load a saved commute</label>
+            <select
+              id="loadCommute"
+              defaultValue=""
+              onChange={(e) => {
+                const selected = savedCommutes.find((c) => c.id === e.target.value);
+                if (selected) {
+                  const startPt = { lat: selected.startLatitude, lng: selected.startLongitude };
+                  const endPt = { lat: selected.endLatitude, lng: selected.endLongitude };
+                  setStart(startPt);
+                  setEnd(endPt);
+                  setStartQuery(selected.startName || "Start");
+                  setEndQuery(selected.endName || "End");
+                  setRoutes([]);
+                  if (mapInstanceRef.current) {
+                    mapInstanceRef.current.setView([startPt.lat, startPt.lng], 13);
+                  }
+                }
+              }}
+            >
+              <option value="" disabled>-- Select a saved trip --</option>
+              {savedCommutes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="field" style={{ marginBottom: 0 }}>
           <label htmlFor="pref">Safety preference</label>
           <select id="pref" value={preference} onChange={(e) => setPreference(e.target.value)}>
