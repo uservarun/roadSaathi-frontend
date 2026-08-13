@@ -24,6 +24,8 @@ export default function PlanRoute() {
 
   const [start, setStart] = useState(null); // { lat, lng }
   const [end, setEnd] = useState(null);     // { lat, lng }
+  const [startQuery, setStartQuery] = useState("");
+  const [endQuery, setEndQuery] = useState("");
   const [preference, setPreference] = useState("SAFEST");
   const [routes, setRoutes] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -39,16 +41,104 @@ export default function PlanRoute() {
   const endMarkerRef = useRef(null);
   const polylineRef = useRef(null);
 
+  // Use current location function
+  const handleUseMyLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const point = { lat, lng };
+          setStart(point);
+          setStartQuery(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView([lat, lng], 14);
+          }
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+            const data = await res.json();
+            if (data.display_name) {
+              setStartQuery(data.display_name.split(",").slice(0, 3).join(","));
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        },
+        (err) => {
+          console.log("Geolocation permission denied.");
+        }
+      );
+    }
+  };
+
+  // Auto-ask geolocation on mount
+  useEffect(() => {
+    handleUseMyLocation();
+  }, []);
+
+  // Geocoding Search
+  const handleSearch = async (query, type) => {
+    if (!query.trim()) return;
+    setError("");
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+      );
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        const point = { lat, lng };
+        if (type === "START") {
+          setStart(point);
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView([lat, lng], 14);
+          }
+        } else {
+          setEnd(point);
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView([lat, lng], 14);
+          }
+        }
+      } else {
+        setError(`Location not found: "${query}". Try adding city or district name.`);
+      }
+    } catch (err) {
+      setError("Failed to geocode address. Please check your internet connection.");
+    }
+  };
+
   // Keep click handler updated to avoid stale closures
   const clickHandlerRef = useRef(null);
-  clickHandlerRef.current = (e) => {
+  clickHandlerRef.current = async (e) => {
     const point = { lat: e.latlng.lat, lng: e.latlng.lng };
     if (!start || (start && end)) {
       setStart(point);
       setEnd(null);
+      setStartQuery(`${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`);
+      setEndQuery("");
       setRoutes([]);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${point.lat}&lon=${point.lng}&format=json`);
+        const data = await res.json();
+        if (data.display_name) {
+          setStartQuery(data.display_name.split(",").slice(0, 3).join(","));
+        }
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setEnd(point);
+      setEndQuery(`${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${point.lat}&lon=${point.lng}&format=json`);
+        const data = await res.json();
+        if (data.display_name) {
+          setEndQuery(data.display_name.split(",").slice(0, 3).join(","));
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -202,8 +292,46 @@ export default function PlanRoute() {
       </div>
 
       <p style={{ marginBottom: 16 }}>
-        Click the map to set a start point, then click again to set your destination.
+        Type start and destination locations below, or click directly on the map.
       </p>
+
+      {/* Address Geocoding Search Panel */}
+      <div className="card card-tight" style={{ marginBottom: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          
+          {/* Start Location Input */}
+          <div className="field" style={{ flex: 1, minWidth: 280, marginBottom: 0 }}>
+            <label htmlFor="startAddr">Start point</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                id="startAddr"
+                placeholder="Type street/landmark or click map..."
+                value={startQuery}
+                onChange={(e) => setStartQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch(startQuery, "START")}
+              />
+              <button type="button" className="btn btn-ghost" style={{ padding: "0 14px" }} onClick={() => handleSearch(startQuery, "START")}>Search</button>
+              <button type="button" className="btn btn-ghost" style={{ padding: "0 12px" }} title="Use current location" onClick={handleUseMyLocation}>📍</button>
+            </div>
+          </div>
+
+          {/* End Location Input */}
+          <div className="field" style={{ flex: 1, minWidth: 280, marginBottom: 0 }}>
+            <label htmlFor="endAddr">Destination point</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                id="endAddr"
+                placeholder="Type street/landmark or click map..."
+                value={endQuery}
+                onChange={(e) => setEndQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch(endQuery, "END")}
+              />
+              <button type="button" className="btn btn-ghost" style={{ padding: "0 14px" }} onClick={() => handleSearch(endQuery, "END")}>Search</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
 
       <div className="map-shell" style={{ marginBottom: 20, height: "400px" }}>
         <div ref={mapContainerRef} style={{ height: "100%", width: "100%", borderRadius: "8px" }} />
