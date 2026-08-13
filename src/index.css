@@ -454,12 +454,51 @@ p {
   gap: 16px;
 }
 
+/* Mobile Bottom Navigation (Hidden on Desktop) */
+.mobile-bottom-nav {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .grid-2 {
     grid-template-columns: 1fr;
   }
   .nav-links {
     display: none;
+  }
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    background: var(--asphalt-800);
+    border-top: 1px solid var(--line-faint);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+  }
+  .mobile-bottom-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex: 1;
+    height: 100%;
+    transition: color 0.15s;
+  }
+  .mobile-bottom-link.active {
+    color: var(--amber);
+    background: rgba(242, 169, 59, 0.04);
+  }
+  .mobile-bottom-label {
+    font-weight: 600;
+  }
+  body {
+    padding-bottom: 62px;
   }
 }
 
