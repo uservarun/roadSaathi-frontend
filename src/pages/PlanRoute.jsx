@@ -345,8 +345,31 @@ export default function PlanRoute() {
         </div>
       </div>
 
-      <div className="map-shell" style={{ marginBottom: 20, height: "400px" }}>
+      <div className="map-shell" style={{ marginBottom: 20, height: "400px", position: "relative" }}>
         <div ref={mapContainerRef} style={{ height: "100%", width: "100%", borderRadius: "8px" }} />
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={handleUseMyLocation}
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            zIndex: 1000,
+            background: "var(--asphalt-800)",
+            border: "1px solid var(--line-faint)",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.4)",
+            padding: "8px 12px",
+            fontSize: "12px",
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            borderRadius: "6px"
+          }}
+        >
+          🎯 Locate Me
+        </button>
       </div>
 
       <div className="card card-tight" style={{ marginBottom: 20, display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
