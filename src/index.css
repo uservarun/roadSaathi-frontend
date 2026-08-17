@@ -507,3 +507,43 @@ p {
   padding: 48px 20px;
   color: var(--text-muted);
 }
+
+/* ---------- Autocomplete Dropdown ---------- */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--asphalt-800);
+  border: 1px solid var(--line-faint);
+  border-radius: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 0;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1010;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.autocomplete-dropdown li {
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line-faint);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s ease;
+  text-align: left;
+}
+
+.autocomplete-dropdown li:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-dropdown li:hover {
+  background: var(--asphalt-700);
+  color: var(--amber);
+}

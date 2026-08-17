@@ -22,6 +22,8 @@ export default function PlanRoute() {
   useDocumentTitle("Plan Route");
   const { user } = useAuth();
 
+  const contactEmail = import.meta.env.VITE_USER_EMAIL;
+
   const [start, setStart] = useState(null); // { lat, lng }
   const [end, setEnd] = useState(null);     // { lat, lng }
   const [startQuery, setStartQuery] = useState("");
@@ -35,6 +37,11 @@ export default function PlanRoute() {
   const [commuteName, setCommuteName] = useState("");
   const [saveStatus, setSaveStatus] = useState({ loading: false, error: "", success: "" });
   const [savedCommutes, setSavedCommutes] = useState([]);
+
+  const [startSuggestions, setStartSuggestions] = useState([]);
+  const [endSuggestions, setEndSuggestions] = useState([]);
+  const [showStartDrop, setShowStartDrop] = useState(false);
+  const [showEndDrop, setShowEndDrop] = useState(false);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -87,6 +94,52 @@ export default function PlanRoute() {
     };
     fetchCommutes();
   }, [user?.id]);
+
+  // Debounce Autocomplete for Start Input
+  useEffect(() => {
+    if (!startQuery || startQuery.trim().length < 3 || start) {
+      setStartSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(startQuery)}&format=json&limit=5&email=${contactEmail}`
+        );
+        const data = await res.json();
+        setStartSuggestions(data || []);
+        setShowStartDrop(true);
+      } catch (e) {
+        console.error("Autocomplete failed", e);
+      }
+    }, 600); // 600ms delay to accommodate slower connections
+
+    return () => clearTimeout(timer);
+  }, [startQuery]);
+
+  // Debounce Autocomplete for End Input
+  useEffect(() => {
+    if (!endQuery || endQuery.trim().length < 3 || end) {
+      setEndSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(endQuery)}&format=json&limit=5&email=${contactEmail}`
+        );
+        const data = await res.json();
+        setEndSuggestions(data || []);
+        setShowEndDrop(true);
+      } catch (e) {
+        console.error("Autocomplete failed", e);
+      }
+    }, 600); // 600ms delay to accommodate slower connections
+
+    return () => clearTimeout(timer);
+  }, [endQuery]);
 
   // Geocoding Search
   const handleSearch = async (query, type) => {
@@ -311,35 +364,91 @@ export default function PlanRoute() {
       <div className="card card-tight" style={{ marginBottom: 20, display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           
-          {/* Start Location Input */}
-          <div className="field" style={{ flex: 1, minWidth: 280, marginBottom: 0 }}>
+          {/* Start Location Input with Autocomplete */}
+          <div className="field" style={{ flex: 1, minWidth: 280, marginBottom: 0, position: "relative" }}>
             <label htmlFor="startAddr">Start point</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input
                 id="startAddr"
-                placeholder="Type street/landmark or click map..."
+                placeholder="Type start street/landmark..."
                 value={startQuery}
-                onChange={(e) => setStartQuery(e.target.value)}
+                onChange={(e) => {
+                  setStartQuery(e.target.value);
+                  setStart(null);
+                  setRoutes([]);
+                }}
+                onFocus={() => setShowStartDrop(true)}
+                onBlur={() => setTimeout(() => setShowStartDrop(false), 200)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch(startQuery, "START")}
               />
               <button type="button" className="btn btn-ghost" style={{ padding: "0 14px" }} onClick={() => handleSearch(startQuery, "START")}>Search</button>
               <button type="button" className="btn btn-ghost" style={{ padding: "0 12px" }} title="Use current location" onClick={handleUseMyLocation}>📍</button>
             </div>
+            {showStartDrop && startSuggestions.length > 0 && (
+              <ul className="autocomplete-dropdown">
+                {startSuggestions.map((item) => (
+                  <li
+                    key={item.place_id}
+                    onClick={() => {
+                      const lat = parseFloat(item.lat);
+                      const lng = parseFloat(item.lon);
+                      setStart({ lat, lng });
+                      setStartQuery(item.display_name.split(",").slice(0, 3).join(","));
+                      setShowStartDrop(false);
+                      setStartSuggestions([]);
+                      if (mapInstanceRef.current) {
+                        mapInstanceRef.current.setView([lat, lng], 14);
+                      }
+                    }}
+                  >
+                    {item.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
-          {/* End Location Input */}
-          <div className="field" style={{ flex: 1, minWidth: 280, marginBottom: 0 }}>
+          {/* End Location Input with Autocomplete */}
+          <div className="field" style={{ flex: 1, minWidth: 280, marginBottom: 0, position: "relative" }}>
             <label htmlFor="endAddr">Destination point</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input
                 id="endAddr"
-                placeholder="Type street/landmark or click map..."
+                placeholder="Type destination street/landmark..."
                 value={endQuery}
-                onChange={(e) => setEndQuery(e.target.value)}
+                onChange={(e) => {
+                  setEndQuery(e.target.value);
+                  setEnd(null);
+                  setRoutes([]);
+                }}
+                onFocus={() => setShowEndDrop(true)}
+                onBlur={() => setTimeout(() => setShowEndDrop(false), 200)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch(endQuery, "END")}
               />
               <button type="button" className="btn btn-ghost" style={{ padding: "0 14px" }} onClick={() => handleSearch(endQuery, "END")}>Search</button>
             </div>
+            {showEndDrop && endSuggestions.length > 0 && (
+              <ul className="autocomplete-dropdown">
+                {endSuggestions.map((item) => (
+                  <li
+                    key={item.place_id}
+                    onClick={() => {
+                      const lat = parseFloat(item.lat);
+                      const lng = parseFloat(item.lon);
+                      setEnd({ lat, lng });
+                      setEndQuery(item.display_name.split(",").slice(0, 3).join(","));
+                      setShowEndDrop(false);
+                      setEndSuggestions([]);
+                      if (mapInstanceRef.current) {
+                        mapInstanceRef.current.setView([lat, lng], 14);
+                      }
+                    }}
+                  >
+                    {item.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
         </div>
