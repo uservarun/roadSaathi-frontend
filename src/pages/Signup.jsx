@@ -13,8 +13,21 @@ export default function Signup() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    const usernameRegex = /^[a-z0-9_-]{3,20}$/;
+    const normalizedUsername = form.username.toLowerCase().trim();
+
+    if (!usernameRegex.test(normalizedUsername)) {
+      setError("Username must be 3-20 characters and contain only lowercase letters, numbers, underscores (_), or hyphens (-). No spaces allowed.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      await signup(form);
+      await signup({
+        ...form,
+        username: normalizedUsername
+      });
       // Backend emails a 6-digit verification code on signup.
       navigate("/verify", { state: { email: form.email } });
     } catch (err) {
