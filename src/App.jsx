@@ -13,6 +13,7 @@ import LiveTrip from "./pages/LiveTrip";
 import Commutes from "./pages/Commutes";
 import GovernmentDashboard from "./pages/GovernmentDashboard";
 import { useAuth } from "./context/AuthContext";
+import Rewards from "./pages/Rewards"
 
 export default function App() {
   const { isAuthenticated, user } = useAuth();
@@ -75,6 +76,15 @@ export default function App() {
           gated behind login for now. Tighten to a role check (e.g.
           user.role === "GOVERNMENT") once the backend adds one.
         */}
+                <Route
+          path="/rewards"
+          element={
+            <ProtectedRoute>
+              <Rewards />
+            </ProtectedRoute>
+          }
+        />
+      
         <Route
           path="/government"
           element={

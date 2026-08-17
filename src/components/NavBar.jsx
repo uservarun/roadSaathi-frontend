@@ -1,5 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState, useEffect } from "react";
+import { api } from "../api/client";
 
 const links = [
   { to: "/plan", label: "Plan route" },
@@ -7,13 +9,30 @@ const links = [
   { to: "/report", label: "Report issue" },
   { to: "/trip", label: "Live trip" },
   { to: "/commutes", label: "Commutes" },
+  { to: "/rewards", label: "Rewards" },
   { to: "/government", label: "Government", adminOnly: true },
 ];
 
 export default function NavBar() {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
-
+  const [points, setPoints] = useState(0);
+ 
+  useEffect(() => {
+    const fetchPoints = async () => {
+      if (isAuthenticated && user?.id) {
+        try {
+          const res = await api.get(`/api/v1/rewards/balance?userId=${user.id}`);
+          setPoints(res.data.points);
+        } catch (e) {
+          console.error("Failed to load points in navbar", e);
+        }
+      }
+    };
+    fetchPoints();
+    const interval = setInterval(fetchPoints, 20000); // refresh every 20 seconds
+    return () => clearInterval(interval);
+  }, [isAuthenticated, user?.id]);
   const visibleLinks = links.filter((l) => !l.adminOnly || user?.role === "ADMIN");
 
   return (
@@ -75,6 +94,7 @@ export default function NavBar() {
           if (l.to === "/report") shortLabel = "Report";
           if (l.to === "/trip") shortLabel = "Live";
           if (l.to === "/commutes") shortLabel = "Commutes";
+          if (l.to === "/rewards") shortLabel = "Rewards";
           if (l.to === "/government") shortLabel = "Gov";
 
           return (
