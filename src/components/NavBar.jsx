@@ -22,7 +22,7 @@ export default function NavBar() {
     const fetchPoints = async () => {
       if (isAuthenticated && user?.id) {
         try {
-          const res = await api.get(`/api/v1/rewards/balance?userId=${user.id}`);
+          const res = await api.get("/api/v1/rewards/balance");
           setPoints(res.data.points);
         } catch (e) {
           console.error("Failed to load points in navbar", e);
@@ -53,7 +53,7 @@ export default function NavBar() {
   return (
     <>
       <header className="navbar">
-        <NavLink to="/plan" className="brand">
+        <NavLink to="/" className="brand">
           <span className="brand-mark" aria-hidden="true" /> RoadSaathi
         </NavLink>
         <nav className="nav-links">
@@ -64,7 +64,10 @@ export default function NavBar() {
           ))}
         </nav>
         <div className="nav-user">
-          <span className="mono">{user?.username}</span>
+          <span className="mono" style={{ marginRight: 8, color: "var(--amber)", fontWeight: 700 }}>
+            ⭐ {points} pts
+          </span>
+          <span className="mono" style={{ marginRight: 12 }}>{user?.username}</span>
           <button className="btn btn-ghost" onClick={() => { logout(); navigate("/"); }}>Log out</button>
         </div>
       </header>

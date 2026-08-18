@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import useDocumentTitle from "../utils/useDocumentTitle";
 
 const features = [
   {
@@ -25,13 +26,13 @@ const features = [
 ];
 
 export default function Home() {
+  useDocumentTitle("Home");
   const { isAuthenticated } = useAuth();
 
   return (
     <main className="home-page">
       <section className="home-hero">
         <div className="hero-copy">
-          <div className="hero-kicker"><span /> SMART ROAD TRAVEL AGENT</div>
           <h1>Don't just find a route.<br /><em>Find a safer one.</em></h1>
           <p className="hero-subtitle">
             RoadSaathi combines route planning with real road-risk information
@@ -148,7 +149,6 @@ export default function Home() {
 
       <footer className="home-footer">
         <span className="brand"><span className="brand-mark" /> RoadSaathi</span>
-        <span className="mono">SMART ROAD TRAVEL AGENT · 2026</span>
       </footer>
     </main>
   );
