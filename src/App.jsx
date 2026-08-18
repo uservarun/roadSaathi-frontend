@@ -14,13 +14,14 @@ import Commutes from "./pages/Commutes";
 import GovernmentDashboard from "./pages/GovernmentDashboard";
 import { useAuth } from "./context/AuthContext";
 import Rewards from "./pages/Rewards"
+import Home from "./pages/Home"
 
 export default function App() {
   const { isAuthenticated, user } = useAuth();
 
   return (
     <>
-      {isAuthenticated && <NavBar />}
+      <NavBar />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -98,7 +99,7 @@ export default function App() {
           }
         />
 
-        <Route path="/" element={<Navigate to={isAuthenticated ? "/plan" : "/login"} replace />} />
+        <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/plan" : "/login"} replace />} />
       </Routes>
     </>
