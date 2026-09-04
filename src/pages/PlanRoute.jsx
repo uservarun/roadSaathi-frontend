@@ -212,11 +212,10 @@ export default function PlanRoute() {
     if (mapContainerRef.current && !mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current).setView(DEFAULT_CENTER, 13);
       
-      // Use clean street style CartoDB Voyager tiles (100% free, no key required)
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 20
+      // Use standard OpenStreetMap tiles (100% free, no key required)
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
       }).addTo(map);
 
       map.on("click", (e) => {
