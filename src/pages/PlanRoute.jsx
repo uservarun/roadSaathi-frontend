@@ -247,7 +247,7 @@ export default function PlanRoute() {
     if (start) {
       const iconA = L.divIcon({
         className: "custom-marker-a",
-        html: `<div style="background-color: #2bb673; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #0d1013; font-family: monospace;">A</div>`,
+        html: `<div style="background-color: #059669; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-family: monospace;">A</div>`,
         iconSize: [24, 24],
         iconAnchor: [12, 12]
       });
@@ -268,7 +268,7 @@ export default function PlanRoute() {
     if (end) {
       const iconB = L.divIcon({
         className: "custom-marker-b",
-        html: `<div style="background-color: #e4572e; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #0d1013; font-family: monospace;">B</div>`,
+        html: `<div style="background-color: #dc2626; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-family: monospace;">B</div>`,
         iconSize: [24, 24],
         iconAnchor: [12, 12]
       });

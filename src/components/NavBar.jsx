@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
 import { api } from "../api/client";
+import ThemeToggle from "./ThemeToggle";
 
 const links = [
   { to: "/plan", label: "Plan route" },
@@ -37,12 +38,15 @@ export default function NavBar() {
   if (!isAuthenticated) {
     return (
       <header className="navbar public-navbar">
-        <NavLink to="/" className="brand">
-          <span className="brand-mark" aria-hidden="true" /> RoadSaathi
-        </NavLink>
-        <div className="public-nav-actions">
-          <NavLink to="/login" className="nav-link">Log in</NavLink>
-          <NavLink to="/signup" className="btn btn-primary">Get started</NavLink>
+        <div className="navbar-inner">
+          <NavLink to="/" className="brand">
+            <span className="brand-mark" aria-hidden="true" /> RoadSaathi
+          </NavLink>
+          <div className="public-nav-actions">
+            <ThemeToggle />
+            <NavLink to="/login" className="nav-link">Log in</NavLink>
+            <NavLink to="/signup" className="btn btn-primary btn-sm">Get started</NavLink>
+          </div>
         </div>
       </header>
     );
@@ -53,24 +57,30 @@ export default function NavBar() {
   return (
     <>
       <header className="navbar">
-        <NavLink to="/" className="brand">
-          <span className="brand-mark" aria-hidden="true" /> RoadSaathi
-        </NavLink>
-        <nav className="nav-links">
-          {visibleLinks.map((l) => (
-            <NavLink key={l.to} to={l.to} className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
-              {l.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="nav-user">
-          <span className="mono" style={{ marginRight: 8, color: "var(--amber)", fontWeight: 700 }}>
-            ⭐ {points} pts
-          </span>
-          <span className="mono" style={{ marginRight: 12 }}>{user?.username}</span>
-          <button className="btn btn-ghost" onClick={() => { logout(); navigate("/"); }}>Log out</button>
+        <div className="navbar-inner">
+          <NavLink to="/" className="brand">
+            <span className="brand-mark" aria-hidden="true" /> RoadSaathi
+          </NavLink>
+
+          <nav className="nav-links">
+            {visibleLinks.map((l) => (
+              <NavLink key={l.to} to={l.to} className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
+                {l.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="nav-user">
+            <span className="nav-points-badge mono">
+              ⭐ {points} pts
+            </span>
+            <span className="nav-username mono">{user?.username}</span>
+            <ThemeToggle />
+            <button className="btn btn-ghost btn-sm" onClick={() => { logout(); navigate("/"); }}>Log out</button>
+          </div>
         </div>
       </header>
+
       <nav className="mobile-bottom-nav">
         {visibleLinks.map((l) => {
           let shortLabel = l.label;
@@ -81,7 +91,11 @@ export default function NavBar() {
           if (l.to === "/commutes") shortLabel = "Commutes";
           if (l.to === "/rewards") shortLabel = "Rewards";
           if (l.to === "/government") shortLabel = "Gov";
-          return <NavLink key={l.to} to={l.to} className={({ isActive }) => `mobile-bottom-link${isActive ? " active" : ""}`}><span className="mobile-bottom-label">{shortLabel}</span></NavLink>;
+          return (
+            <NavLink key={l.to} to={l.to} className={({ isActive }) => `mobile-bottom-link${isActive ? " active" : ""}`}>
+              <span className="mobile-bottom-label">{shortLabel}</span>
+            </NavLink>
+          );
         })}
       </nav>
     </>

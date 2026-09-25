@@ -67,7 +67,7 @@ export default function Dashboard() {
 
       const customIcon = L.divIcon({
         className: "custom-hazard-pothole",
-        html: `<div style="background-color: #f2a93b; width: 14px; height: 14px; transform: rotate(45deg); border: 2px solid #0d1013;"></div>`,
+        html: `<div style="background-color: #f2a93b; width: 14px; height: 14px; transform: rotate(45deg); border: 2px solid #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.25);"></div>`,
         iconSize: [14, 14],
         iconAnchor: [7, 7]
       });
@@ -91,7 +91,7 @@ export default function Dashboard() {
 
       const customIcon = L.divIcon({
         className: "custom-hazard-alert",
-        html: `<div style="background-color: #e4572e; border-radius: 50%; width: 14px; height: 14px; border: 2px solid #0d1013;"></div>`,
+        html: `<div style="background-color: #e4572e; border-radius: 50%; width: 14px; height: 14px; border: 2px solid #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.25);"></div>`,
         iconSize: [14, 14],
         iconAnchor: [7, 7]
       });
